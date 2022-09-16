@@ -8,19 +8,30 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"kubernetes-resource-list/config"
+	"os"
 	"strings"
 )
 
 var (
-	prefer *bool
+	kubeConfig = pflag.StringP("kubeconfig", "c", "", "(optional) absolute path to the kubeconfig file")
+	prefer     = pflag.BoolP("prefer", "p", false, "(optional) only display the supported resources with the version preferred by the server.")
+	search     = pflag.StringP("search", "s", "", "(optional) only display the supported resources for a group and version.")
+	version    = pflag.BoolP("version", "v", false, "show app version")
+	Version    string
+	Build      string
 )
 
 func main() {
-	prefer = pflag.BoolP("prefer", "p", false, "(optional) only display the supported resources with the version preferred by the server.")
-	search := pflag.StringP("search", "s", "", "(optional) only display the supported resources for a group and version.")
-	c := config.InitKubeConfig()
 	pflag.Parse()
+
+	// init kubeconfig file
+	c := config.InitKubeConfig(kubeConfig)
+
+	// show app info
+	showInfo()
+
 	discoveryClient := newDiscoveryClient(*c)
+
 	if *search == "" {
 		getResources(discoveryClient)
 	} else {
@@ -99,4 +110,17 @@ func tableHeader() {
 
 func searchTableHeader() {
 	fmt.Printf("%-35s\t%-s\n", "NAME", "VERBS")
+}
+
+func showInfo() {
+	if *version {
+		showAppInfo()
+		os.Exit(0)
+	}
+}
+
+func showAppInfo() {
+	fmt.Printf("Version:\t %s\n", Version)
+	fmt.Printf("Build:\t %s\n", Build)
+
 }

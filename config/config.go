@@ -1,14 +1,11 @@
 package config
 
 import (
-	"github.com/spf13/pflag"
 	"os"
 	"path/filepath"
 )
 
-func InitKubeConfig() *string {
-	var kubeConfig *string
-	kubeConfig = pflag.StringP("kubeconfig", "c", "", "(optional) absolute path to the kubeconfig file")
+func InitKubeConfig(kubeConfig *string) *string {
 	if *kubeConfig == "" {
 		if home := homeDir(); home != "" {
 			c := filepath.Join(home, ".kube", "config")
